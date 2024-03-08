@@ -10,6 +10,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QIntValidator, QKeySequence, QFont
 
 from ComplicatedProcess import ComplicateProcess
+from SimpleProcess import SimpleProcess
 
 UI = uic.loadUiType(r'.\ui\4th.ui')[0]
 
@@ -26,18 +27,35 @@ class MWindow(QMainWindow, UI):
         self.exitBtn.clicked.connect(self.exit)
         self.checkBtn.clicked.connect(self.checkReg)
 
+        self.radio_btn_group = [self.complicated_btn, self.simple_btn]
+
         self.dialog = None
         self.layout = None
 
+    def check_btn(self):
+        return self.complicated_btn.isChecked() or self.simple_btn.isChecked()
+
     def go(self):
+        if not self.check_btn():
+            self.setAlertDialog('Check Radio Button')
+            return
         if self.dialog is not None and self.layout is not None:
             self.removeWidgets()
         else:
             try:
-                result_dict = self.getHwpData()
+                pros = None
+                if self.complicated_btn.isChecked():
+                    pros = ComplicateProcess()
+                elif self.simple_btn.isChecked():
+                    pros = SimpleProcess()
+
+                result_dict = self.getHwpData(pros)
+                print(f'go {result_dict}')
                 self.setDialog(result_dict)
             except ValueError:
                 self.setAlertDialog('⛔An error occurred while parsing the file⛔')
+            except Exception as e:
+                print(e)
 
     def setAlertDialog(self, alert_text: str):
         self.initDialog()
@@ -59,9 +77,13 @@ class MWindow(QMainWindow, UI):
 
         # 탭을 활용해서 데이터를 카테고리 별로 데이터를 분류
         tabs = QTabWidget(self.dialog)
+
         for i in result_dict:
             df = pd.DataFrame(result_dict[i]).transpose()
-            tabs.addTab(self.drawPandas(self.classficationEveningData(df)), i)
+            try:
+                tabs.addTab(self.drawPandas(self.classficationEveningData(df)), i)
+            except IndexError:
+                tabs.addTab(self.drawPandas(df), i)
 
         self.layout.addWidget(tabs)
         self.layout.addWidget(self.initButton('Done', self.dialog, self.dialog_close))
@@ -79,17 +101,19 @@ class MWindow(QMainWindow, UI):
         # QDialog 세팅
         self.dialog.setWindowTitle('Result')
         self.dialog.setWindowModality(Qt.ApplicationModal)
-        self.dialog.resize(130 * len(result_dict), 600)
+        self.dialog.resize(400 * len(result_dict), 600)
 
         self.dialog.setModal(False)
         self.dialog.show()
 
     def save_table(self, table):
         filename = 'Result'
-        print(table)
         with pd.ExcelWriter(f'{filename}.xlsx') as writer:
             for i in table:
-                data = self.classficationEveningData(pd.DataFrame(table[i]).transpose())
+                try:
+                    data = self.classficationEveningData(pd.DataFrame(table[i]).transpose())
+                except:
+                    data = pd.DataFrame(table[i]).transpose()
                 data.to_excel(writer, sheet_name=i, index=False)
 
                 wb = writer.book
@@ -101,7 +125,7 @@ class MWindow(QMainWindow, UI):
                 #     ws.set_column(col_num, col_num, None, center_alignment)
 
                 for j, column in enumerate(columns):
-                    width = 15
+                    width = 30
                     ws.set_column(j, j, width, center_alignment)
 
     # 자주 등장하는 초기화 과정을 함수로 묶어보면 어떨가 하는 내 생각
@@ -144,8 +168,8 @@ class MWindow(QMainWindow, UI):
         self.layout = None
 
     # 한글 데이터 가져오기
-    def getHwpData(self):
-        self.process = ComplicateProcess()
+    def getHwpData(self, pros):
+        self.process = pros
         return self.process.go(self.comboBox.currentText())
 
     # pandas 마지막에 저녁 데이터 분류

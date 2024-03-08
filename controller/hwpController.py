@@ -16,7 +16,7 @@ class hwpController:
 
         self.__hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
         self.__hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")  # 보안 모듈 등록 > 첫 화면에 대화 상자 스킵
-        self.__hwp.XHwpWindows.Item(0).Visible = True  # 화면에 화면이 보일지 말지 결정하는 값
+        self.__hwp.XHwpWindows.Item(0).Visible = False  # 화면에 화면이 보일지 말지 결정하는 값
 
         pd.set_option('display.max_columns', None)
         pd.set_option('display.max_rows', None)
