@@ -11,11 +11,10 @@ from PyQt5.QtGui import QIntValidator, QKeySequence, QFont
 
 from ComplicatedProcess import ComplicateProcess
 from SimpleProcess import SimpleProcess
+from ui.temp_ui import Ui_MainWindow
 
-UI = uic.loadUiType(r'.\ui\4th.ui')[0]
 
-
-class MWindow(QMainWindow, UI):
+class MWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -101,7 +100,7 @@ class MWindow(QMainWindow, UI):
         # QDialog 세팅
         self.dialog.setWindowTitle('Result')
         self.dialog.setWindowModality(Qt.ApplicationModal)
-        self.dialog.resize(400 * len(result_dict), 600)
+        self.dialog.resize(150 * len(result_dict), 600)
 
         self.dialog.setModal(False)
         self.dialog.show()
