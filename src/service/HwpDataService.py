@@ -1,57 +1,33 @@
-import clipboard, winreg, os
+import win32com.client, clipboard
+
+from src.exception.CustomException import NotFoundKeyWordError
 
 
-from tkinter import filedialog
-
-
-def checkReg() -> None:
-    updateRegPath = r'Software\HNC\HwpAutomation\Modules'
-
-    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, updateRegPath, 0, winreg.KEY_WRITE)
-
-    value_name = "SecurityModule"
-    value_data = rf"{os.getcwd()}\FilePathCheckerModuleExample.dll"
-    print(value_data)
-
-    winreg.SetValueEx(key, value_name, 0, winreg.REG_SZ, value_data)
-
-    winreg.CloseKey(key)
-
-
-class hwpService:
+class HwpDataService:
     def __init__(self):
         pass
-    # HWP 레지스트리 보안 모듈 체크
-    # 미등록 시 등록도 할 수 있게
-    # 현재 디렉토리를 기준으로 data 값을 수정하기
 
-    # 클래스 변환 작업하기
-    def getHwpName(self) -> str:
-        return filedialog.askopenfilename()
+    def find_page(self, hwp: win32com.client.CDispatch, find_text: str) -> [int, int]:
+        try:
+            hwp.HAction.GetDefault("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
+            hwp.HParameterSet.HFindReplace.FindString = find_text
+            hwp.HParameterSet.HFindReplace.WholeWordOnly = True
+            hwp.HParameterSet.HFindReplace.IgnoreMessage = True
+            hwp.HParameterSet.HFindReplace.FindType = True
 
-    # filedialog를 통해서 [ 파일 이름.확장자 ] 값 가져오기
-    def openHwp(self, hwp, hwpName: str):
-        hwp.Open(hwpName, "HWP", "forceopen:true")
-        hwp.HAction.Run("MoveDocBegin")
+            hwp.HAction.Execute("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
 
-    def findPage(self, hwp, findStr: str) -> [int, int]:
-        hwp.HAction.GetDefault("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
-        hwp.HParameterSet.HFindReplace.FindString = findStr
-        hwp.HParameterSet.HFindReplace.WholeWordOnly = True
-        hwp.HParameterSet.HFindReplace.IgnoreMessage = True
-        hwp.HParameterSet.HFindReplace.FindType = True
+            hwp.HAction.Run("Select")
+            hwp.HAction.Run("Copy")
 
-        hwp.HAction.Execute("RepeatFind", hwp.HParameterSet.HFindReplace.HSet)
+            first_page = int(hwp.XHwpDocuments.Item(0).XHwpDocumentInfo.CurrentPage)
+            target_page = int(''.join(clipboard.paste())[-4:])
 
-        hwp.HAction.Run("Select")
-        hwp.HAction.Run("Copy")
+            return first_page, target_page
+        except Exception as e:
+            raise NotFoundKeyWordError("Can't find the keyword")
 
-        first_pageNum = int(hwp.XHwpDocuments.Item(0).XHwpDocumentInfo.CurrentPage)
-        target_pageNum = int(''.join(clipboard.paste())[-4:])
-
-        return target_pageNum, first_pageNum
-
-    def delPage(self, hwp, target: int, first: int) -> None:
+    def delete_page(self, hwp: win32com.client.CDispatch, first: int, target: int) -> None:
         hwp.HAction.Run("MoveDocBegin")
 
         for i in range(first):
@@ -60,7 +36,7 @@ class hwpService:
         for i in range(target):
             hwp.HAction.Run("DeletePage")
 
-    def delCtrl(self, hwp) -> None:
+    def delete_ctrl(self, hwp: win32com.client.CDispatch) -> None:
         hwp.HAction.GetDefault("DeleteCtrls", hwp.HParameterSet.HDeleteCtrls.HSet)
         hwp.HParameterSet.HDeleteCtrls.CreateItemArray("DeleteCtrlType", 3)
         hwp.HParameterSet.HDeleteCtrls.DeleteCtrlType.SetItem(0, 31)
@@ -84,7 +60,7 @@ class hwpService:
         hwp.HParameterSet.HFindReplace.IgnoreMessage = 1
         hwp.HAction.Execute("AllReplace", hwp.HParameterSet.HFindReplace.HSet)
 
-    def copyGrapgh(self, hwp):
+    def copy_table(self, hwp: win32com.client.CDispatch):
         result = ''
         ctrl = hwp.HeadCtrl
 
@@ -108,7 +84,11 @@ class hwpService:
 
         return result
 
-    def closeHwp(self, hwp) -> None:
-        hwp.HAction.Run("FileClose")
-        hwp.XHwpDocuments.Close(False)
-        hwp.Quit()
+    def parse_table(self, hwp: win32com.client, title: str):
+        first_page, target_page = self.find_page(hwp, title)
+        self.delete_page(hwp, first_page, target_page)
+        self.delete_ctrl(hwp)
+
+        table_list = self.copy_table(hwp)
+
+        return list(filter(lambda v: v, table_list.replace("\r\n", " ").split(" ")) )
