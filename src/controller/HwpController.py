@@ -9,10 +9,10 @@ from src.service.HwpFileManager import HwpFileManager
 
 class HwpController:
     # 의존성 주입을 통한 클래스 생성자 정의
-    def __init__(self, registry_manager: HwpRegistryManager, file_manager: HwpFileManager, data_service: HwpDataService):
-        self.registry_manager = registry_manager
-        self.file_manager = file_manager
-        self.data_service = data_service
+    def __init__(self):
+        self.registry_manager = HwpRegistryManager()
+        self.file_manager = HwpFileManager()
+        self.data_service = HwpDataService()
 
         self.__table_list = None
 
@@ -45,4 +45,4 @@ a = HwpRegistryManager()
 b = HwpFileManager()
 c = HwpDataService()
 d = HwpController(a, b, c)
-d.get_table_list(filedialog.askopenfilename(), '일자별 발파 및 계측 현황')
+d.get_table_list(filedialog.askopenfilename(), '일자별 계측 현황')

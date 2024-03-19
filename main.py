@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QShortcut, QMainWindow, QApplication, QTableWidgetIt
 from PyQt5 import uic
 from PyQt5.QtGui import QIntValidator, QKeySequence, QFont
 
+from src.controller.HwpController import HwpController
 from ui.temp_ui import Ui_MainWindow
 
 
@@ -19,8 +20,10 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
         self.startBtn.clicked.connect(self.go)
         self.exitBtn.clicked.connect(self.exit)
-        # self.checkBtn.clicked.connect(self.checkReg)
+        self.checkBtn.clicked.connect(self.check_regedit)
         self.radio_btn_group = [self.complicated_btn, self.simple_btn]
+
+        self.hwp_controller = HwpController()
 
         self.process = None
         self.dialog = None
@@ -33,7 +36,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
         if not self.check_btn():
             return
 
-
+    def check_regedit(self):
+        pass
         # if not self.check_btn():
         #     self.setAlertDialog('Check Radio Button')
         #     return
