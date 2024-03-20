@@ -10,7 +10,7 @@ class HwpFileManager:
         try:
             self.__hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
             self.__hwp.RegisterModule("FilePathCheckDLL", "SecurityModule")
-            self.__hwp.XHwpWindows.Item(0).Visible = True
+            self.__hwp.XHwpWindows.Item(0).Visible = False
 
             self.__hwp.Open(file_name, "HWP", "forceopen:true")
             self.__hwp.HAction.Run("MoveDocBegin")

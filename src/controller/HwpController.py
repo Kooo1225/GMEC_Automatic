@@ -40,9 +40,3 @@ class HwpController:
 
     def get_list(self):
         return self.__table_list
-
-a = HwpRegistryManager()
-b = HwpFileManager()
-c = HwpDataService()
-d = HwpController(a, b, c)
-d.get_table_list(filedialog.askopenfilename(), '일자별 계측 현황')

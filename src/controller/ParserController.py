@@ -4,7 +4,7 @@ from src.service.ComplicatedParser import ComplicatedParser
 from src.service.ParseService import ParseService
 
 
-class ComplicatedParserController:
+class ParserController:
     def __init__(self, parser: ParseService, table_list):
         self.parser = parser
         self.table_list = table_list

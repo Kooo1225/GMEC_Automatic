@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.controller.ComplicatedParserController import ComplicatedParserController
+from src.controller.ParserController import ParserController
 import clipboard
 import pandas as pd
 
@@ -29,11 +29,11 @@ clipboard_list = list(filter(lambda v: v, clipboard.paste().replace("\r\n", " ")
 
 
 parser = SimpleParser()
-test_case = ComplicatedParserController(parser, clipboard_list)
+test_case = ParserController(parser, clipboard_list)
 test_case.run_parse()
 
 print(test_case.get_result_dict())
 
 df_list = [pd.DataFrame(test_case.get_result_dict()[i]).transpose() for i in test_case.get_result_dict()]
 for item in df_list:
-    print(item)
+    print(classification_evening_data(item))
