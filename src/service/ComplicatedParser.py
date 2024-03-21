@@ -1,4 +1,4 @@
-import re
+import re, uuid
 import numpy as np
 from itertools import takewhile
 from src.service.ParseService import ParseService
@@ -7,9 +7,15 @@ from src.service.ParseService import ParseService
 class ComplicatedParser(ParseService):
     def __init__(self):
         self.title = ['발파진동(cm/s)', '진동레벨dB(V)', '소음레벨dB(A)']
+        self.blast_pattern = None
 
     def extract_columns(self, items_list):
         columns = list(takewhile(lambda x: not re.match(r'\d+월\d+일', x), items_list))
+        if '발파패턴' in columns:
+            self.blast_pattern = True
+        else:
+            self.blast_pattern = False
+
         return [i for i in items_list if i not in columns]
 
     def conversion_error_value(self, non_columns_list):
@@ -101,8 +107,9 @@ class ComplicatedParser(ParseService):
                     value.append(i)
                 elif i in location_list:
                     location_key = i
+                    unique_key = str(uuid.uuid4())
                     result[location_key] = {} if location_key not in result else result[location_key]
-                    result[location_key][f'{time_key} | {count_key}'] = {'일시': f'{date_key} {time_key}'}
+                    result[location_key][unique_key] = {'일시': f'{date_key} {time_key}'}
 
                     for j in range(len(self.title)):
                         try:
@@ -110,7 +117,7 @@ class ComplicatedParser(ParseService):
                         except ValueError:
                             tmp = np.nan
                         finally:
-                            result[location_key][f'{time_key} | {count_key}'][self.title[j]] = tmp
+                            result[location_key][unique_key][self.title[j]] = tmp
                     value = []
 
         return result

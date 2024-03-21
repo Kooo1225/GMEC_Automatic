@@ -1,4 +1,5 @@
 import re
+import uuid
 
 import numpy as np
 
@@ -94,12 +95,13 @@ class SimpleParser(ParseService):
                     value_list.append(item)
                 elif item in location_list:
                     location_key = item
+                    unique_key = str(uuid.uuid4())
                     result_dict[location_key] = {} if location_key not in result_dict else result_dict[location_key]
 
-                    result_dict[location_key][f'{date_key} {index}'] = {'일시': date_key}
+                    result_dict[location_key][unique_key] = {'일시': date_key}
                     for j in range(len(self.title)):
-                        result_dict[location_key][f'{date_key} {index}'][f'{self.title[j]} 최저치'] = float(items[index + 1])
-                        result_dict[location_key][f'{date_key} {index}'][f'{self.title[j]} 최고치'] = float(items[index + 2])
+                        result_dict[location_key][unique_key][f'{self.title[j]} 최저치'] = float(items[index + 1])
+                        result_dict[location_key][unique_key][f'{self.title[j]} 최고치'] = float(items[index + 2])
 
         return result_dict
 

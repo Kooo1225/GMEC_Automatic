@@ -12,11 +12,15 @@ from PyQt5.QtGui import QIntValidator, QKeySequence, QFont
 
 from src.controller.HwpController import HwpController
 from src.controller.ModalController import ModalViewController
+from src.controller.PandasController import PandasController
 from src.controller.ParserController import ParserController
-from src.exception.CustomException import HwpObjectNotFoundError, HwpOpenError
+from src.exception.CustomException import *
 from src.service.ComplicatedParser import ComplicatedParser
 from src.service.SimpleParser import SimpleParser
 from ui.temp_ui import Ui_MainWindow
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 
 class MWindow(QMainWindow, Ui_MainWindow):
@@ -33,6 +37,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
         self.hwp_controller = HwpController()
         self.modal_controller = ModalViewController()
+        self.pandas_controller = PandasController()
         self.parser_controller = None
 
     def check_btn(self):
@@ -57,20 +62,33 @@ class MWindow(QMainWindow, Ui_MainWindow):
             # 1. 한글에서 표 데이터 가져오기 ( 파일명이랑 표 제목 매개로 보내기 )
             self.hwp_controller.get_table_list(filedialog.askopenfilename(), self.comboBox.currentText())
             table_list = self.hwp_controller.get_list()
-            print(table_list)
 
             # # 2. 사용자가 선택한 Parser로 데이터 분석하기
             self.parser_controller = ParserController(self.select_parser(self.radio_btn.text()), table_list)
             self.parser_controller.run_parse()
             result_dict = self.parser_controller.get_result_dict()
 
-            self.modal_controller.set_tabs_view(result_dict, self.radio_btn.text())
-            self.modal_controller.get_dialog().show()
+            # 3. Dict -> DataFrame으로 변경하기
+            for item in result_dict:
+                dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
+                dataframe.index = dataframe.index.astype(str)
+
+                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
+                dataframe = self.pandas_controller.get_dataframe()
+
+                self.modal_controller.set_tabs_view()
+                print(item, dataframe)
+
+            # self.modal_controller.set_tabs_view(result_dict, self.radio_btn.text())
+            # self.modal_controller.get_dialog().show()
         except HwpOpenError as open_error:
             self.modal_controller.set_error_view('⚠️HWP 열기에 실패하였습니다⚠️', 'Exit', 'HWP Error')
             self.modal_controller.get_dialog().show()
         except HwpObjectNotFoundError as not_found_error:
             self.modal_controller.set_error_view('⚠️HWP 객체를 탐색하지 못했습니다⚠️', 'Exit', 'HWP Error')
+            self.modal_controller.get_dialog().show()
+        except NotFoundKeyWordError as not_found_key_word:
+            self.modal_controller.set_error_view('⚠️HWP 키워드를 탐색하지 못했습니다⚠️', 'Exit', 'HWP Error')
             self.modal_controller.get_dialog().show()
         except Exception as error:
             print(error)

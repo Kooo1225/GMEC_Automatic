@@ -1,7 +1,7 @@
 import winreg, os
 from tkinter import filedialog
 
-from src.exception.CustomException import HwpOpenError, HwpObjectNotFoundError
+from src.exception.CustomException import HwpOpenError, HwpObjectNotFoundError, NotFoundKeyWordError
 from src.service.HwpDataService import HwpDataService
 from src.service.HwpRegistryManager import HwpRegistryManager
 from src.service.HwpFileManager import HwpFileManager
@@ -35,6 +35,8 @@ class HwpController:
             raise HwpOpenError("Failed to open Hwp file.")
         except HwpObjectNotFoundError as e:
             raise HwpObjectNotFoundError("Hwp Object is not initialized.")
+        except NotFoundKeyWordError as e:
+            raise NotFoundKeyWordError("Can't find the keyword")
         finally:
             self.file_manager.close_hwp()
 
