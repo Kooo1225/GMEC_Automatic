@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\4th.ui'
+# Form implementation generated from reading ui file '.\ui\4th.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -14,9 +14,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(306, 152)
+        MainWindow.setWindowModality(QtCore.Qt.NonModal)
+        MainWindow.resize(306, 146)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(".\\../robot.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(".\\ui\\../../../../Downloads/KakaoTalk_20240322_152353247-removebg-preview.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setIconSize(QtCore.QSize(24, 25))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -82,7 +83,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Guff"))
         self.label.setText(_translate("MainWindow", "표 페이지 제목"))
         self.comboBox.setItemText(0, _translate("MainWindow", "일자별 발파 및 계측 현황"))
         self.comboBox.setItemText(1, _translate("MainWindow", "일자별 계측 현황"))
@@ -92,3 +93,4 @@ class Ui_MainWindow(object):
         self.exitBtn.setText(_translate("MainWindow", "종료하기"))
         self.complicated_btn.setText(_translate("MainWindow", "복잡이"))
         self.simple_btn.setText(_translate("MainWindow", "간단이"))
+

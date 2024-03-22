@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="icon">
+    <file>FilePathCheckerModuleExample.dll</file>
+    <file>main_icon.ico</file>
+  </qresource>
+</RCC>

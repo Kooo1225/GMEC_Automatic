@@ -1,50 +1,29 @@
 import numpy as np
 import pandas as pd
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTabWidget, QLabel, QPushButton, QTableWidget, QTableWidgetItem, \
-    QWidget, QHeaderView, QLayout
+    QWidget, QHeaderView, QLayout, QFileDialog
 from PyQt5.QtCore import Qt
 
 
 # 현재 ModalViewService에서 한번에 통합된 동작을 함
 # 이 부분을 좀 더 디테일하게 나눠서 Controller에서 통합된 동작을 하게 하는게 좋을듯 함
 class ModalViewService:
-    def set_tabs_dialog(self, dialog: QDialog, evening_data, tab, tab_name: str):
-        layout = QVBoxLayout()
-        tabs = QTabWidget(dialog)
+    def set_table_tabs(self, evening_data):
+        tabs = QTabWidget()
+        max_width = 0
+        max_height = 0
 
         for item in evening_data:
-            tabs.addTab(self.draw_dataframe(item), tab_name)
+            # 여기서 item은 하나의 pd.DataFrame
+            tab = self.draw_dataframe(item[1])
+            tabs.addTab(tab, item[0])
 
-        layout.addWidget(tabs)
-        layout.addWidget(self.init_button('Done', dialog))
+            size_hint = tab.sizeHint()
+            max_width = max(max_width, size_hint.width())
+            max_height = max(max_height, size_hint.height())
 
-        # save_btn = QPushButton('Save', dialog)
-        # save_btn.clicked.connect(lambda: self.save_table(data_dict))
-        # font = QFont()
-        # font.setFamily('Han Santteut Dotum')
-        # save_btn.setFont(font)
-        #
-        # layout.addWidget(save_btn)
-
-        dialog.setLayout(layout)
-        dialog.setWindowTitle('분석 결과')
-        dialog.setWindowModality(Qt.ApplicationModal)
-        dialog.resize(QTableWidget.sizeHint().width(), QTableWidget.sizeHint().height())
-
-        dialog.setModal(False)
-
-    def set_alert_dialog(self, dialog: QDialog, alert_text: str, btn_text: str, title_text: str):
-        layout = QVBoxLayout()
-        layout.addWidget(self.init_label(alert_text))
-        layout.addWidget(self.init_button(btn_text, dialog))
-
-        dialog.setWindowTitle(title_text)
-        dialog.setWindowModality(Qt.ApplicationModal)
-        dialog.setLayout(layout)
-        dialog.resize(100, 50)
-
-        dialog.setModal(True)
+        return tabs
 
     def draw_dataframe(self, df):
         tableWidget = QTableWidget()
@@ -87,27 +66,40 @@ class ModalViewService:
 
         return tab
 
-    def init_dialog(self, layout, window_title, width, height, set_modal):
-        dialog = QDialog()
+    def save_table(self, save_data):
+        filename = QFileDialog.getSaveFileName(None, "Save Excel File", "", "Excel Files (*.xlsx)")[0]
+        if not filename:
+            return False
 
+        with pd.ExcelWriter(filename) as writer:
+            for data_key, df in save_data:
+                df.to_excel(writer, sheet_name=data_key, index=False)
+                worksheet = writer.sheets[data_key]
+                center_format = writer.book.add_format({'align': 'center', 'valign': 'center'})
+
+                for idx, col in enumerate(df.columns):
+                    max_len = df[col].astype(str).map(len).max()
+                    max_len = max(max_len, len(str(col))) + 5
+                    worksheet.set_column(idx, idx, max_len, center_format)
+
+        return True
+
+    def set_dialog(self, dialog, layout, window_title, set_modal):
+        dialog.setWindowFlags(dialog.windowFlags() | Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint)
+
+        dialog.setWindowIcon(QIcon(':icon/main_icon.ico'))
         dialog.setWindowTitle(window_title)
-        dialog.setFixedSize(width, height)
         dialog.setWindowModality(Qt.ApplicationModal)
         dialog.setLayout(layout)
         dialog.setModal(set_modal)
 
         return dialog
 
-
     def init_label(self, alert_text):
         label = QLabel()
         label.setText(alert_text)
 
-        font = QFont()
-        font.setFamily("Han Santteut Dotum")
-        font.setPointSize(9)
-
-        label.setFont(font)
+        label.setFont(self.init_font("Han Santteut Dotum", 9))
 
         return label
 
@@ -115,9 +107,15 @@ class ModalViewService:
         btn = QPushButton(btn_text, attached_instance)
         btn.clicked.connect(attached_instance.close)
 
-        font = QFont()
-        font.setFamily("Han Santteut Dotum")
-
-        btn.setFont(font)
+        btn.setFont(self.init_font("Han Santteut Dotum"))
 
         return btn
+
+    def init_font(self, font_name: str, optional_font_size: int = None):
+        font = QFont()
+        font.setFamily(font_name)
+
+        if optional_font_size is not None:
+            font.setPointSize(optional_font_size)
+
+        return font

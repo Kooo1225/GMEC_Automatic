@@ -2,20 +2,23 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>306</width>
-    <height>152</height>
+    <height>146</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Guff</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../robot.ico</normaloff>../robot.ico</iconset>
+    <normaloff>../../../../Downloads/KakaoTalk_20240322_152353247-removebg-preview.ico</normaloff>../../../../Downloads/KakaoTalk_20240322_152353247-removebg-preview.ico</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -181,6 +184,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

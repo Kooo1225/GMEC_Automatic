@@ -1,14 +1,10 @@
-import sys, os, xlsxwriter
+import sys
 from tkinter import filedialog
 
 import pandas as pd
-import numpy as np
 
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtSignal, QRect
-from PyQt5.QtWidgets import QShortcut, QMainWindow, QApplication, QTableWidgetItem, QWidget, QTabWidget, QTableWidget, \
-    QVBoxLayout, QDialog, QPushButton, QLabel, QFileDialog
-from PyQt5 import uic
-from PyQt5.QtGui import QIntValidator, QKeySequence, QFont
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtGui import QIcon
 
 from src.controller.HwpController import HwpController
 from src.controller.ModalController import ModalViewController
@@ -17,16 +13,14 @@ from src.controller.ParserController import ParserController
 from src.exception.CustomException import *
 from src.service.ComplicatedParser import ComplicatedParser
 from src.service.SimpleParser import SimpleParser
-from ui.temp_ui import Ui_MainWindow
-
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-
+from ui.main_ui import Ui_MainWindow
+from ui.res_rc import *
 
 class MWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setWindowIcon(QIcon(':icon/main_icon.ico'))
 
         self.startBtn.clicked.connect(self.go)
         self.exitBtn.clicked.connect(self.exit)
@@ -68,7 +62,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.parser_controller.run_parse()
             result_dict = self.parser_controller.get_result_dict()
 
-            # 3. Dict -> DataFrame으로 변경하기
+            # 3. Dict -> DataFrame으로 변경하고 리스트로 관리하기
+            dataframe_list = []
             for item in result_dict:
                 dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
                 dataframe.index = dataframe.index.astype(str)
@@ -76,11 +71,10 @@ class MWindow(QMainWindow, Ui_MainWindow):
                 self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
                 dataframe = self.pandas_controller.get_dataframe()
 
-                self.modal_controller.set_tabs_view()
-                print(item, dataframe)
+                dataframe_list.append([item, dataframe])
 
-            # self.modal_controller.set_tabs_view(result_dict, self.radio_btn.text())
-            # self.modal_controller.get_dialog().show()
+            self.modal_controller.set_tabs_view(dataframe_list)
+            self.modal_controller.get_dialog().show()
         except HwpOpenError as open_error:
             self.modal_controller.set_error_view('⚠️HWP 열기에 실패하였습니다⚠️', 'Exit', 'HWP Error')
             self.modal_controller.get_dialog().show()
@@ -101,30 +95,6 @@ class MWindow(QMainWindow, Ui_MainWindow):
         except KeyError as e:
             self.modal_controller.set_error_view(f'{e}', 'Exit', 'Regedit Manager')
             self.modal_controller.get_dialog().show()
-
-    # def save_table(self, table):
-    #     filename = 'Result'
-    #     with pd.ExcelWriter(f'{filename}.xlsx') as writer:
-    #         for i in table:
-    #             try:
-    #                 data = self.classficationEveningData(pd.DataFrame(table[i]).transpose())
-    #             except:
-    #                 data = pd.DataFrame(table[i]).transpose()
-    #             data.to_excel(writer, sheet_name=i, index=False)
-    #
-    #             wb = writer.book
-    #             ws = writer.sheets[i]
-    #             columns = data.columns
-    #
-    #             center_alignment = wb.add_format({'align': 'center', 'valign': 'vcenter'})
-    #             # for col_num in range(len(columns)):
-    #             #     ws.set_column(col_num, col_num, None, center_alignment)
-    #
-    #             for j, column in enumerate(columns):
-    #                 width = 30
-    #                 ws.set_column(j, j, width, center_alignment)
-
-
 
     def exit(self):
         self.close()

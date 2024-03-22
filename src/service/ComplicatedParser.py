@@ -44,7 +44,10 @@ class ComplicatedParser(ParseService):
                     continue
                 elif re.match(r'\d+:\d+', conversion_error_list[index]) and re.match(r'\d+회', conversion_error_list[index - 1]):
                     filtered_list.append(conversion_error_list[index])
-                    skip_count += 4
+                    if self.blast_pattern == "발파패턴":
+                        skip_count += 4
+                    else:
+                        skip_count += 3
                 else:
                     filtered_list.append(conversion_error_list[index])
             except TypeError as e:
