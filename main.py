@@ -68,7 +68,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
                 dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
                 dataframe.index = dataframe.index.astype(str)
 
-                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
+                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text(), False)
                 dataframe = self.pandas_controller.get_dataframe()
 
                 dataframe_list.append([item, dataframe])
@@ -83,6 +83,9 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.modal_controller.get_dialog().show()
         except NotFoundKeyWordError as not_found_key_word:
             self.modal_controller.set_error_view('⚠️HWP 키워드를 탐색하지 못했습니다⚠️', 'Exit', 'HWP Error')
+            self.modal_controller.get_dialog().show()
+        except ParseException as parse_exception:
+            self.modal_controller.set_error_view("⚠️HWP 표 분석 중 에러가 발생했습니다⚠️", 'Exit', 'Parse Error')
             self.modal_controller.get_dialog().show()
         except Exception as error:
             print(error)

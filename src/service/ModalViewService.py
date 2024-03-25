@@ -71,16 +71,19 @@ class ModalViewService:
         if not filename:
             return False
 
-        with pd.ExcelWriter(filename) as writer:
-            for data_key, df in save_data:
-                df.to_excel(writer, sheet_name=data_key, index=False)
-                worksheet = writer.sheets[data_key]
-                center_format = writer.book.add_format({'align': 'center', 'valign': 'center'})
+        try:
+            with pd.ExcelWriter(filename) as writer:
+                for data_key, df in save_data:
+                    df.to_excel(writer, sheet_name=data_key, index=False)
+                    worksheet = writer.sheets[data_key]
+                    center_format = writer.book.add_format({'align': 'center', 'valign': 'center'})
 
-                for idx, col in enumerate(df.columns):
-                    max_len = df[col].astype(str).map(len).max()
-                    max_len = max(max_len, len(str(col))) + 5
-                    worksheet.set_column(idx, idx, max_len, center_format)
+                    for idx, col in enumerate(df.columns):
+                        max_len = df[col].astype(str).map(len).max()
+                        max_len = max(max_len, len(str(col))) + 5
+                        worksheet.set_column(idx, idx, max_len, center_format)
+        except Exception as e:
+            print(e)
 
         return True
 
