@@ -68,7 +68,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
                 dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
                 dataframe.index = dataframe.index.astype(str)
 
-                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text(), False)
+                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
                 dataframe = self.pandas_controller.get_dataframe()
 
                 dataframe_list.append([item, dataframe])

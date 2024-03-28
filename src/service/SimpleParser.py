@@ -36,21 +36,38 @@ class SimpleParser(ParseService):
 
     def delete_other_value(self, conversion_error_list):
         filtered_list = []
-        skip_count = 0
+        skip_count, data_count = 0, 0
 
         for index, item in enumerate(conversion_error_list):
-            try:
-                if skip_count > 0:
-                    skip_count -= 1
-                    continue
-                elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
-                    skip_count += 2
-                elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and not re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
-                    skip_count += 1
-                else:
-                    filtered_list.append(item)
-            except TypeError as e:
+            if skip_count > 0:
+                skip_count -= 1
+                continue
+
+            if re.match(r'\d+\.\d+', str(item)) or item is np.nan:
                 filtered_list.append(item)
+                data_count += 1
+
+                if data_count >= 6:
+                    if self.other_simple_version:
+                        skip_count += 3
+                    else:
+                        skip_count += 2
+                    data_count = 0
+            else:
+                filtered_list.append(item)
+        # for index, item in enumerate(conversion_error_list):
+        #     try:
+        #         if skip_count > 0:
+        #             skip_count -= 1
+        #             continue
+        #         elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
+        #             skip_count += 2
+        #         elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and not re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
+        #             skip_count += 1
+        #         else:
+        #             filtered_list.append(item)
+        #     except TypeError as e:
+        #         filtered_list.append(item)
 
         return filtered_list
 
@@ -90,7 +107,7 @@ class SimpleParser(ParseService):
                 except TypeError as e:
                     data_count -= 1
 
-        return list(set(location))
+        return sorted(list(set(location)))
 
     def get_dict(self, classification_list, location_list):
         result_dict = {}

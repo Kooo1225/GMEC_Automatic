@@ -88,7 +88,7 @@ class ComplicatedParser(ParseService):
                 except TypeError as t:
                     data_count += 1
 
-        return list(set(location_list))
+        return sorted(list(set(location_list)))
 
     def get_dict(self, classification_list, location_list):
         result = {}
