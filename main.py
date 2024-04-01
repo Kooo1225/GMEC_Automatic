@@ -12,9 +12,11 @@ from src.controller.PandasController import PandasController
 from src.controller.ParserController import ParserController
 from src.exception.CustomException import *
 from src.service.ComplicatedParser import ComplicatedParser
+from src.service.ProperParser import ProperParser
 from src.service.SimpleParser import SimpleParser
 from ui.main_ui import Ui_MainWindow
 from ui.res_rc import *
+
 
 class MWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -27,6 +29,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.checkBtn.clicked.connect(self.check_regedit)
         self.complicated_btn.toggled.connect(self.on_radio_btn_toggle)
         self.simple_btn.toggled.connect(self.on_radio_btn_toggle)
+        self.proper_btn.toggled.connect(self.on_radio_btn_toggle)
         self.radio_btn = None
 
         self.hwp_controller = HwpController()
@@ -35,7 +38,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
         self.parser_controller = None
 
     def check_btn(self):
-        return self.complicated_btn.isChecked() or self.simple_btn.isChecked()
+        return self.complicated_btn.isChecked() or self.simple_btn.isChecked() or self.proper_btn.isChecked()
 
     def on_radio_btn_toggle(self):
         self.radio_btn = self.sender()
@@ -45,6 +48,8 @@ class MWindow(QMainWindow, Ui_MainWindow):
             return ComplicatedParser()
         elif parser_name == "간단이":
             return SimpleParser()
+        elif parser_name == "어중이떠중이":
+            return ProperParser()
 
     def go(self):
         if self.radio_btn is None:
