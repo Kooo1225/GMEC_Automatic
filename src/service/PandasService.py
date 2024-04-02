@@ -3,10 +3,10 @@ import numpy as np
 
 
 class PandasService:
-    def classification_evening_data(self, data_frame: pd.DataFrame, parser_name: str):
+    def classification_evening_data(self, data_frame: pd.DataFrame, parser_name: str, set_min_max=True):
         new_columns = []
 
-        if parser_name == "복잡이":
+        if not parser_name == "간단이":
             for index, item in enumerate(list(data_frame.index)):
                 time = int(data_frame.loc[item, '일시'].split(" ")[1].split(':')[0])
                 if time >= 18:
@@ -17,8 +17,9 @@ class PandasService:
 
             data_frame['Atfter 18:00'] = new_columns
 
-        data_frame.loc['MIN'] = data_frame.min()
-        data_frame.loc['MAX'] = data_frame.max()
+        if set_min_max:
+            data_frame.loc['MIN'] = data_frame.min()
+            data_frame.loc['MAX'] = data_frame.max()
 
         return data_frame
 

@@ -22,13 +22,14 @@ class ComplicatedParser(ParseService):
         conversion_error_list = []
 
         for item in non_columns_list:
-            if item == "계측기오류":
+            if item == "계측기오류" or item == "SD카드오류":
                 conversion_error_list.extend([np.nan, np.nan, np.nan])
             elif re.match(r'n/*?t', item, re.IGNORECASE) or item == "-":
                 conversion_error_list.append(np.nan)
             else:
                 conversion_error_list.append(item)
 
+        # print(conversion_error_list)
         return conversion_error_list
 
     def delete_other_value(self, conversion_error_list):
@@ -53,6 +54,7 @@ class ComplicatedParser(ParseService):
             except TypeError as e:
                 filtered_list.append(conversion_error_list[index])
 
+        # print(filtered_list)
         return filtered_list
 
     def classification_by_date(self, filtered_list):
@@ -71,6 +73,7 @@ class ComplicatedParser(ParseService):
         if current_date_section:
             section.append(current_date_section)
 
+        # print(section)
         return section
 
     def extract_location(self, classification_list):
@@ -87,40 +90,40 @@ class ComplicatedParser(ParseService):
                         data_count = 0
                 except TypeError as t:
                     data_count += 1
-
-        return list(set(location_list))
+        # print(sorted(list(set(location_list))))
+        return sorted(list(set(location_list)))
 
     def get_dict(self, classification_list, location_list):
         result = {}
         value = []
 
-        date_key, time_key, location_key = None, None, None
+        date_key, location_key = None, None
 
-        for item in classification_list:
-            for x, i in enumerate(item):
-                if isinstance(i, float):
-                    i = str(i)
-                if re.match(r'\d+월\d+일', i):
-                    date_key = i
-                elif re.match(r'\d+회', i):
-                    count_key = i
-                elif re.match(r'\d+:\d+', i):
-                    time_key = i
-                elif i not in location_list:
-                    value.append(i)
-                elif i in location_list:
-                    location_key = i
+        for items in classification_list:
+            for index, item in enumerate(items):
+                if re.match(r'\d+월\d+일', str(item)):
+                    date_key = item
+                elif date_key and re.match(r'\d+:\d+', str(item)):
+                    blast_time = item
+                    time_key = f'{date_key} {blast_time}'
+                elif re.match(r'\d+\.\d+', str(item)) or item is np.nan:
+                    value.append(item)
+                elif item in location_list:
+                    location_key = item
                     unique_key = str(uuid.uuid4())
-                    result[location_key] = {} if location_key not in result else result[location_key]
-                    result[location_key][unique_key] = {'일시': f'{date_key} {time_key}'}
 
-                    for j in range(len(self.title)):
+                    result[location_key] = {} if location_key not in result else result[location_key]
+                    result[location_key][unique_key] = {'일시': time_key}
+
+                    for idx in range(len(self.title)):
                         try:
-                            tmp = float(value[j])
+                            tmp = float(value[idx])
                         except ValueError:
                             tmp = np.nan
-                        finally:
-                            result[location_key][unique_key][self.title[j]] = tmp
+
+                        result[location_key][unique_key][self.title[idx]] = tmp
+
                     value = []
 
+        # print(result)
         return result

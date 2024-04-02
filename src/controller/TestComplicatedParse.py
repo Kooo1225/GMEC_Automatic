@@ -36,4 +36,5 @@ print(test_case.get_result_dict())
 
 df_list = [pd.DataFrame(test_case.get_result_dict()[i]).transpose() for i in test_case.get_result_dict()]
 for item in df_list:
-    print(classification_evening_data(item))
+    print(item)
+    # print(classification_evening_data(item))

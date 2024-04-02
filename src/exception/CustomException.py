@@ -20,3 +20,8 @@ class NoneException(Exception):
     def __init__(self, message="Data is not found"):
         self.message = message
         super().__init__(self.message)
+
+class ParseException(Exception):
+    def __init__(self, message="Error raise on parsing"):
+        self.message = message
+        super().__init__(self.message)
