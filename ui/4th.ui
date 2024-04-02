@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>313</width>
-    <height>146</height>
+    <width>302</width>
+    <height>144</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>120</x>
       <y>20</y>
       <width>90</width>
       <height>16</height>
@@ -48,7 +48,7 @@
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>87</x>
+      <x>120</x>
       <y>50</y>
       <width>161</width>
       <height>31</height>
@@ -84,9 +84,9 @@
    <widget class="QPushButton" name="startBtn">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>12</y>
-      <width>71</width>
+      <x>120</x>
+      <y>90</y>
+      <width>81</width>
       <height>31</height>
      </rect>
     </property>
@@ -96,15 +96,15 @@
      </font>
     </property>
     <property name="text">
-     <string>시작하기</string>
+     <string>Start</string>
     </property>
    </widget>
    <widget class="QPushButton" name="checkBtn">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>52</y>
-      <width>71</width>
+      <x>200</x>
+      <y>10</y>
+      <width>81</width>
       <height>31</height>
      </rect>
     </property>
@@ -114,15 +114,15 @@
      </font>
     </property>
     <property name="text">
-     <string>시스템 체크</string>
+     <string>Sys Check</string>
     </property>
    </widget>
    <widget class="QPushButton" name="exitBtn">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>200</x>
       <y>90</y>
-      <width>71</width>
+      <width>81</width>
       <height>31</height>
      </rect>
     </property>
@@ -132,14 +132,14 @@
      </font>
     </property>
     <property name="text">
-     <string>종료하기</string>
+     <string>Exit</string>
     </property>
    </widget>
    <widget class="QRadioButton" name="complicated_btn">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>100</y>
+      <x>20</x>
+      <y>20</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -156,8 +156,8 @@
    <widget class="QRadioButton" name="simple_btn">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>100</y>
+      <x>20</x>
+      <y>60</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -174,8 +174,8 @@
    <widget class="QRadioButton" name="proper_btn">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>100</y>
+      <x>20</x>
+      <y>98</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -195,7 +195,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>313</width>
+     <width>302</width>
      <height>21</height>
     </rect>
    </property>

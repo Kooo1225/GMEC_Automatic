@@ -62,7 +62,7 @@ class MWindow(QMainWindow, Ui_MainWindow):
             self.hwp_controller.get_table_list(filedialog.askopenfilename(), self.comboBox.currentText())
             table_list = self.hwp_controller.get_list()
 
-            # # 2. 사용자가 선택한 Parser로 데이터 분석하기
+            # 2. 사용자가 선택한 Parser로 데이터 분석하기
             self.parser_controller = ParserController(self.select_parser(self.radio_btn.text()), table_list)
             self.parser_controller.run_parse()
             result_dict = self.parser_controller.get_result_dict()

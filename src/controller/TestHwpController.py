@@ -16,4 +16,4 @@ from src.controller.HwpController import HwpController
 
 
 test_case = HwpController()
-test_case.get_table_list(filedialog.askopenfilename(), '일자별 발파 및 계측 현황')
+print(test_case.get_table_list(filedialog.askopenfilename(), '일자별 발파 및 계측 현황'))
