@@ -32,7 +32,7 @@ class ModalViewController:
         # 함수 처리가 미비해서 임시로 생성한 버튼
         save_btn = QPushButton('Save', self.dialog)
         save_btn.clicked.connect(lambda: self.service.save_table(data))
-        save_btn.setFont(self.service.init_font("Han Santteut Dotum"))
+        save_btn.setFont(self.service.init_font("Arial"))
         self.layout.addWidget(save_btn)
         self.layout.addWidget(self.service.init_button('Done', self.dialog))
 
