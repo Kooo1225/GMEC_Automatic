@@ -3,7 +3,7 @@ from tkinter import filedialog
 
 import pandas as pd
 
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
 from PyQt5.QtGui import QIcon
 
 from src.controller.HwpController import HwpController
@@ -59,27 +59,29 @@ class MWindow(QMainWindow, Ui_MainWindow):
 
         try:
             # 1. 한글에서 표 데이터 가져오기 ( 파일명이랑 표 제목 매개로 보내기 )
-            self.hwp_controller.get_table_list("/Users/dobby/Desktop/Workspace/3월 계측보고서(신안산선2공구A-1).hwp", "일자별 발파 및 계측 현황")
-            # table_list = self.hwp_controller.get_list()
+            filepath, _ = QFileDialog.getOpenFileName(self, "Open File", "")
+            self.hwp_controller.get_table_list(filepath, self.comboBox.currentText())
+            table_list = self.hwp_controller.get_list()
+            print(len(table_list))
 
-            # # 2. 사용자가 선택한 Parser로 데이터 분석하기
-            # self.parser_controller = ParserController(self.select_parser(self.radio_btn.text()), table_list)
-            # self.parser_controller.run_parse()
-            # result_dict = self.parser_controller.get_result_dict()
+            # 2. 사용자가 선택한 Parser로 데이터 분석하기
+            self.parser_controller = ParserController(self.select_parser(self.radio_btn.text()), table_list)
+            self.parser_controller.run_parse()
+            result_dict = self.parser_controller.get_result_dict()
 
-            # # 3. Dict -> DataFrame으로 변경하고 리스트로 관리하기
-            # dataframe_list = []
-            # for item in result_dict:
-            #     dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
-            #     dataframe.index = dataframe.index.astype(str)
+            # 3. Dict -> DataFrame으로 변경하고 리스트로 관리하기
+            dataframe_list = []
+            for item in result_dict:
+                dataframe = pd.DataFrame(result_dict[item]).transpose().reset_index(drop=True)
+                dataframe.index = dataframe.index.astype(str)
 
-            #     self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
-            #     dataframe = self.pandas_controller.get_dataframe()
+                self.pandas_controller.classification_evening_data_from_dataframe(dataframe, self.radio_btn.text())
+                dataframe = self.pandas_controller.get_dataframe()
 
-            #     dataframe_list.append([item, dataframe])
+                dataframe_list.append([item, dataframe])
 
-            # self.modal_controller.set_tabs_view(dataframe_list)
-            # self.modal_controller.get_dialog().show()
+            self.modal_controller.set_tabs_view(dataframe_list)
+            self.modal_controller.get_dialog().show()
         except HwpOpenError as open_error:
             self.modal_controller.set_error_view('⚠️HWP 열기에 실패하였습니다⚠️', 'Exit', 'HWP Error')
             self.modal_controller.get_dialog().show()

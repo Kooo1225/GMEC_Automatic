@@ -4,7 +4,7 @@ import re
 
 class HwpService:
     def hwp2xml(self, file_path: str):
-        exefile="/opt/homebrew/anaconda3/envs/hwp-parser-test/bin/hwp5proc"
+        exefile="hwp5proc"
 
         mXml = f'{file_path[:-4]}.xml'
         mHwp = file_path
@@ -41,13 +41,14 @@ class HwpService:
                 "text": "".join(elem.text for elem in cell.findall(".//Text") if elem.text)
             }
 
-            print(cell_data)
-
             if len(current_table_data) != 0 and cell_data['row'] == '0' and cell_data['col'] == '0':
                 table_data.append(current_table_data)
                 current_table_data = [cell_data]
             else:
                 current_table_data.append(cell_data)
+        
+        if current_table_data:
+            table_data.append(current_table_data)
 
         return table_data
     
@@ -61,6 +62,12 @@ class HwpService:
                 for entry in sublist
             )
         ]
+
+        text_data = []
+        for items in target_data:
+            for item in items:
+                text_data.append(item['text'].replace(" ", ""))
         
-        return target_data
+        text_data = list(filter(lambda x: x, text_data))
+        return text_data
     
