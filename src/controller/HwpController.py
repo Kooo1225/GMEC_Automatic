@@ -13,10 +13,19 @@ class HwpController:
 
     def get_table_list(self, file_name: str, title: str):
         xml = self.service.hwp2xml(file_name)
-        xml_tag = self.service.find_tag(xml, title)
-        table_data = self.service.find_table(xml_tag[1])
+        target_tag = self.service.set_target_tag(xml, title)
 
-        self.__table_list = self.service.delete_non_target_data(table_data)
+        section_tag = []
+        for item in target_tag:
+            section_tag.extend(self.service.set_section_tag(item))
+        
+        table_cell = []
+        for index, item in enumerate(list(set(section_tag))):
+            table_cell.extend(self.service.set_table_cell(item, target_tag[index]))
 
+        print(table_cell)
+        self.__table_list = self.service.set_table_data(list(set(table_cell)))
     def get_list(self):
         return self.__table_list
+
+

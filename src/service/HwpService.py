@@ -17,57 +17,62 @@ class HwpService:
 
         return mXml
 
-    def find_tag(self, xml, search_text: str):
+    def set_target_tag(self, xml, search_text: str):
         tree = ET.parse(xml)
-        root = tree.getroot()
+        root = list(tree.getroot().iter())
 
-        result_tag = []
-        for elem in root.iter():
-            if elem.text and search_text in elem.text:
-                for find_tag in elem.iterancestors():
-                    if find_tag.tag == "ColumnSet":
-                        result_tag.append(find_tag)
-
-        return result_tag
-    
-    def find_table(self, xml_tag):
-        table_data = []
-        current_table_data = []
-
-        for cell in xml_tag.findall(".//TableCell"):
-            cell_data = {
-                "row": cell.get("row"),
-                "col": cell.get("col"),
-                "text": "".join(elem.text for elem in cell.findall(".//Text") if elem.text)
-            }
-
-            if len(current_table_data) != 0 and cell_data['row'] == '0' and cell_data['col'] == '0':
-                table_data.append(current_table_data)
-                current_table_data = [cell_data]
-            else:
-                current_table_data.append(cell_data)
+        target_tag = []
+        for item in root:
+            if item.text and search_text in item.text and item.text.startswith(search_text):
+                target_tag.append(item)
         
-        if current_table_data:
-            table_data.append(current_table_data)
+        return target_tag
+    
+    def set_section_tag(self, target_tag):
+        section_tag = []
+        
+        for item in target_tag.iterancestors():
+            if item.tag == "SectionDef":
+                section_tag.append(item)
 
+        return section_tag
+    
+    def set_table_cell(self, section_tag, target_tag):
+        table_tag = []
+        start_collecting = False
+
+        for item in section_tag.iter():
+            if item == target_tag:
+                start_collecting = True
+            elif start_collecting and item.tag == "TableCell":
+                table_tag.append(item)
+
+        return table_tag
+
+    def set_table_data(self, table_tag):
+        table_data = []
+
+        for cell in table_tag:
+            cell_data = "".join(elem.text for elem in cell.findall(".//Text") if elem.text)
+            table_data.append(cell_data)
         return table_data
     
-    def delete_non_target_data(self, table_data):
-        target_data_text = ['일자', '계측위치', '진동레벨', '소음레벨']
+    # def delete_non_target_data(self, table_data):
+    #     target_data_text = ['일자', '계측위치', '진동레벨', '소음레벨']
 
-        target_data = [
-            sublist for sublist in table_data
-            if any(
-                entry['row'] in ['0', '1'] and any(keyword in entry['text'] for keyword in target_data_text)
-                for entry in sublist
-            )
-        ]
+    #     target_data = [
+    #         sublist for sublist in table_data
+    #         if any(
+    #             entry['row'] in ['0', '1'] and any(keyword in entry['text'] for keyword in target_data_text)
+    #             for entry in sublist
+    #         )
+    #     ]
 
-        text_data = []
-        for items in target_data:
-            for item in items:
-                text_data.append(item['text'].replace(" ", ""))
+    #     text_data = []
+    #     for items in target_data:
+    #         for item in items:
+    #             text_data.append(item['text'].replace(" ", ""))
         
-        text_data = list(filter(lambda x: x, text_data))
-        return text_data
+    #     text_data = list(filter(lambda x: x, text_data))
+    #     return text_data
     
