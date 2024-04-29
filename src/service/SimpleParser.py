@@ -111,7 +111,6 @@ class SimpleParser(ParseService):
 
     def get_dict(self, classification_list, location_list):
         result_dict = {}
-        value_list = []
 
         date_key, location_key = None, None
 
@@ -121,10 +120,10 @@ class SimpleParser(ParseService):
                     item = str(item)
 
                 if re.match(r'\d+월\d+일', item):
+                    print(f'시간 설정 : {item}')
                     date_key = item
-                elif item not in location_list:
-                    value_list.append(item)
                 elif item in location_list:
+                    print(f'장소 설정 : {item}')
                     location_key = item
                     unique_key = str(uuid.uuid4())
                     result_dict[location_key] = {} if location_key not in result_dict else result_dict[location_key]

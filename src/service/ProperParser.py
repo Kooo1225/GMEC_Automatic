@@ -67,7 +67,7 @@ class ProperParser(ParseService):
                     location_list.append(item)
                     data_count = 0
 
-        return location_list
+        return list(set(location_list))
 
     def get_dict(self, classification_list, location_list):
         result = {}
@@ -98,7 +98,5 @@ class ProperParser(ParseService):
                             tmp = np.nan
 
                         result[location_key][unique_key][self.title[idx]] = tmp
-
-                    value = []
 
         return result

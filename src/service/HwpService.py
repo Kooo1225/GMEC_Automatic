@@ -41,6 +41,7 @@ class HwpService:
     
     def set_table_cell(self, column_tag, target_tag):
         table_tag = []
+        current_table_tag = []
         start_collecting = False
 
         for item in column_tag.iter():
@@ -50,12 +51,22 @@ class HwpService:
                 data = {
                     'row': item.get('row'),
                     'col': item.get('col'),
-                    'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text)
+                    'rowspan': item.get('rowspan'),
+                    'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")
                 }
-                table_tag.append(data)
-        
-        return table_tag
 
+                if data['text'] == '' or int(item.get('colspan')) > 1:
+                    continue
+                if len(current_table_tag) != 0 and data['row'] == '0' and data['col'] == '0':
+                    table_tag.append(current_table_tag)
+                    current_table_tag = [data]
+                else:
+                    current_table_tag.append(data)
+
+        if current_table_tag:
+            table_tag.append(current_table_tag)
+
+        return table_tag
     
     def delete_non_target_data(self, table_data):
         target_data_text = ['일자', '계측위치', '진동레벨', '소음레벨']
@@ -68,11 +79,4 @@ class HwpService:
             )
         ]
 
-        text_data = []
-        for items in target_data:
-            for item in items:
-                text_data.append(item['text'].replace(" ", ""))
-        
-        text_data = list(filter(lambda x: x, text_data))
-        return text_data
-    
+        return target_data
