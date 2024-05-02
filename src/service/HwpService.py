@@ -51,12 +51,11 @@ class HwpService:
                 data = {
                     'row': item.get('row'),
                     'col': item.get('col'),
+                    'colspan': item.get('colspan'),
                     'rowspan': item.get('rowspan'),
                     'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")
                 }
 
-                if data['text'] == '' or int(item.get('colspan')) > 1:
-                    continue
                 if len(current_table_tag) != 0 and data['row'] == '0' and data['col'] == '0':
                     table_tag.append(current_table_tag)
                     current_table_tag = [data]
@@ -67,16 +66,4 @@ class HwpService:
             table_tag.append(current_table_tag)
 
         return table_tag
-    
-    def delete_non_target_data(self, table_data):
-        target_data_text = ['일자', '계측위치', '진동레벨', '소음레벨']
 
-        target_data = [
-            sublist for sublist in table_data
-            if any(
-                entry['row'] in ['0', '1'] and any(keyword in entry['text'] for keyword in target_data_text)
-                for entry in sublist
-            )
-        ]
-
-        return target_data

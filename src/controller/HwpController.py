@@ -29,8 +29,8 @@ class HwpController:
         for index in range(len(column_tag)):
             table_cell.extend(self.service.set_table_cell(column_tag[index], target_tag[index]))
 
-        self.__table_list = self.service.delete_non_target_data(table_cell)
-
+        self.__table_list = table_cell
+        
         os.remove(xml)
 
     def get_list(self):
