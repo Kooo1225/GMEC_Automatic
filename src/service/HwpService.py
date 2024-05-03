@@ -49,10 +49,10 @@ class HwpService:
                 start_collecting = True
             elif start_collecting and item.tag == "TableCell":
                 data = {
-                    'row': item.get('row'),
-                    'col': item.get('col'),
-                    'colspan': item.get('colspan'),
-                    'rowspan': item.get('rowspan'),
+                    'row': int(item.get('row')),
+                    'col': int(item.get('col')),
+                    'colspan': int(item.get('colspan')),
+                    'rowspan': int(item.get('rowspan')),
                     'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")
                 }
 

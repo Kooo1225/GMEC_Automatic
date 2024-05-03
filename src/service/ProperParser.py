@@ -28,16 +28,20 @@ class ProperParser:
         컬럼은 대부분 표의 시작 부분에 작성되기 때문에 row 값은 0 혹은 1에 위치하게 됩니다.
         이후 컬럼 값들이 딕셔너리로 저장되어 있기 때문에 중복을 제거 후 리스트로 반환합니다.
         """
-        columns = [[item['text'] for item in items if item['row'] == '0' or item['row'] == '1'] for items in table_list ]
-        columns = set(tuple(items) for items in columns)
-        
-        return [item for items in columns for item in items]
+        columns = []
+        for items in table_list:
+            for item in items:
+                if item not in [i for i in columns]:
+                    if int(item['row']) == 0 or int(item['row']) == 1:
+                        columns.append(item)
+
+        return columns
     
     def extract_non_column_data(self, table_list, columns):
         """
         한글 표에서 컬럼 부분을 제거한 나머지 데이터들을 반환합니다.
         """
-        return [[item for item in items[len(columns):]]for items in table_list]
+        return [[item for item in items[len(columns):] if not int(item['colspan']) > 1]for items in table_list]
     
     def group_by_date(self, dict_list):
         """
@@ -58,6 +62,9 @@ class ProperParser:
         한글 표에 병합 처리된 셀에 대한 데이터 처리를 완료한 뒤 리스트로 반환합니다.
         병합 처리된 셀은 rowspan 값을 이용하여 탐지한 뒤 해당 row값이 없는 리스트에 추가해 줍니다.
         """
+        cached_merge_data = []
+        cached_head_data = []
+        
         for idx, items in enumerate(group_list):
             head_data = [data for data in items if int(data['col']) == 0 and int(data['rowspan']) > 1]
             merge_data = [data for data in items if int(data['col']) != 0 and int(data['rowspan']) > 1]
@@ -84,8 +91,9 @@ class ProperParser:
         """
         serialize_list = []
 
+        columns = [item for item in columns if int(item['colspan']) <= 1]
         for items in group_list:
-            data = {column: item['text'] for column, item in zip(columns, items) if column != '발파횟수'}
+            data = {column['text']: item['text'] for column, item in zip(columns, items) if column != '발파횟수'}
             serialize_list.append(data)
 
         return serialize_list
