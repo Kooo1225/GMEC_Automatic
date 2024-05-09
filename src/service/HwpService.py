@@ -1,7 +1,11 @@
 import os
 import lxml.etree as ET
 import re
-
+# 'row': int(item.get('row')),
+# 'col': int(item.get('col')),
+# 'colspan': int(item.get('colspan')),
+# 'rowspan': int(item.get('rowspan')),
+# 'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")   
 
 class HwpService:
     def hwp2xml(self, file_path: str):
@@ -49,11 +53,16 @@ class HwpService:
                 start_collecting = True
             elif start_collecting and item.tag == "TableCell":
                 data = {
-                    'row': int(item.get('row')),
-                    'col': int(item.get('col')),
-                    'colspan': int(item.get('colspan')),
-                    'rowspan': int(item.get('rowspan')),
+                    'row': item.get('row'),
+                    'col': item.get('col'),
+                    'colspan': item.get('colspan'),
+                    'rowspan': item.get('rowspan'),
                     'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")
+                    # 'row': int(item.get('row')),
+                    # 'col': int(item.get('col')),
+                    # 'colspan': int(item.get('colspan')),
+                    # 'rowspan': int(item.get('rowspan')),
+                    # 'text': "".join(elem.text for elem in item.findall(".//Text") if elem.text).replace(" ", "")
                 }
 
                 if len(current_table_tag) != 0 and data['row'] == '0' and data['col'] == '0':
