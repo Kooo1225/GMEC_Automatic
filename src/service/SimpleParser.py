@@ -6,138 +6,135 @@ import numpy as np
 from src.service.ParseService import ParseService
 
 
-class SimpleParser(ParseService):
-    def __init__(self):
-        self.title = ['진동속도(cm/s)', '진동레벨[dB(V)]', '소음[dB(A)]']
-        self.other_simple_version = False
+class SimpleParser():
+    import re, uuid
+import numpy as np
+
+from src.service.ParseService import ParseService
+
+
+class SimpleParser:
+    def delete_non_target_data(self, table_data):
+        """
+        한글 표에서 원하지 않은 부분까지 나온 데이터를 정리하여 리스트로 반환합니다.
+        target_data_text에 표에 반복적으로 들어가는 텍스트를 입력하여 필요없는 데이터를 삭제합니다.
+        """
+        target_data_text = ['구분', '진동속도', '진동레벨', '소음', '허용기준', '비고']
+
+        target_data = [
+            sublist for sublist in table_data
+            if any(
+                entry['row'] in ['1', '2'] and any(keyword in entry['text'] for keyword in target_data_text)
+                for entry in sublist
+            )
+        ]
+
+        return target_data
 
     def extract_columns(self, table_list):
-        columns = ['구분', '진동속도(cm/s)', '진동레벨[dB(V)]', '소음[dB(A)]', '최저치', '최고치', '최저치', '최고치', '최저치', '최고치', '허용기준',
-                   '비고']
-
-        if '현장관리기준' in table_list:
-            self.other_simple_version = True
-            table_list = [i for i in table_list if '현장관리기준' not in i]
-
-        return [i for i in table_list if i not in columns and not re.match(r'[^\w\s-]', i)]
-
-    def conversion_error_value(self, non_columns_list):
-        conversion_error_list = []
-
-        for item in non_columns_list:
-            if self.other_simple_version and re.match(r'n/*?t\(.*?\)', item, re.IGNORECASE):
-                conversion_error_list.extend([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
-            elif not self.other_simple_version and re.match(r'n/*?t', item, re.IGNORECASE) or item == '-':
-                conversion_error_list.append(np.nan)
-            else:
-                conversion_error_list.append(item)
-
-        return conversion_error_list
-
-    def delete_other_value(self, conversion_error_list):
-        filtered_list = []
-        skip_count, data_count = 0, 0
-
-        for index, item in enumerate(conversion_error_list):
-            if skip_count > 0:
-                skip_count -= 1
-                continue
-
-            if re.match(r'\d+\.\d+', str(item)) or item is np.nan:
-                filtered_list.append(item)
-                data_count += 1
-
-                if data_count >= 6:
-                    if self.other_simple_version:
-                        skip_count += 3
-                    else:
-                        skip_count += 2
-                    data_count = 0
-            else:
-                filtered_list.append(item)
-        # for index, item in enumerate(conversion_error_list):
-        #     try:
-        #         if skip_count > 0:
-        #             skip_count -= 1
-        #             continue
-        #         elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
-        #             skip_count += 2
-        #         elif re.match(r'\d+\.\d+cm/s', item, re.IGNORECASE) and not re.match(r'\d+\.\d+cm/s', conversion_error_list[index + 1], re.IGNORECASE):
-        #             skip_count += 1
-        #         else:
-        #             filtered_list.append(item)
-        #     except TypeError as e:
-        #         filtered_list.append(item)
-
-        return filtered_list
-
-    def classification_by_date(self, filtered_list):
-        section_list = []
-        current_date_section = []
-
-        for item in filtered_list:
-            try:
-                if re.match(r'\d+월\d+일', item) and current_date_section:
-                    section_list.append(current_date_section)
-                    current_date_section = []
-                current_date_section.append(item)
-            except TypeError as e:
-                current_date_section.append(item)
-
-        if current_date_section:
-            section_list.append(current_date_section)
-
-        return section_list
-
-    def extract_location(self, classification_list):
-        location = []
-        data_count = 6
-
-        for items in classification_list:
+        """
+        한글 표에서 공통적인 컬럼 부분을 추출합니다.
+        컬럼은 대부분 표의 시작 부분에 작성되기 때문에 row 값은 0 혹은 1에 위치하게 됩니다.
+        또한 한글 표를 row순서대로 읽기 때문에 특정 병합이 되어 있을 경우
+        한글에선 뒤에 있는 컬럼이 앞에 있을 수 있기 때문에 해당 부분도 max함수와 row값을 이용해서 조정합니다.
+        이후 컬럼 값들이 딕셔너리로 저장되어 있기 때문에 중복을 제거 후 리스트로 반환합니다.
+        """
+        columns = []
+        for items in table_list:
             for item in items:
-                try:
-                    if len(location) == 0 and not re.match(r'\d+\.\d+', item) and item is not np.nan and not re.match(
-                            r'\d+월\d+일', item):
-                        location.append(item)
-                    if re.match(r'\d+\.\d+', item) or item is np.nan:
-                        data_count -= 1
-                    elif data_count == 0 and not re.match(r'\d+월\d+일', item):
-                        location.append(item)
-                        data_count = 6
-                except TypeError as e:
-                    data_count -= 1
+                if item not in [i for i in columns]:
+                    row = int(item['row'])
 
-        return sorted(list(set(location)))
+                    if row == 0 and row == 0:
+                        continue
+                    elif row == 1 or row == 2:
+                        columns.append(item)
+        
+        data = {
+            'row': 0,
+            'col': 0,
+            'colspan': 1,
+            'rowspan': 1,
+            'text': '일시'
+        }
+        columns.insert(0, data)
 
-    def get_dict(self, classification_list, location_list):
-        result_dict = {}
-        value_list = []
+        return columns
+    
+    def extract_non_column_data(self, table_list, columns):
+        """
+        한글 표에서 컬럼 부분을 제거한 나머지 데이터들을 반환합니다.
+        """
+        dict_list = []
+        for items in table_list:
+            data = []
+            for item in items:
+                if not int(item['colspan']) > 1 and item['text'] not in [column['text'] for column in columns]:
+                    data.append(item)
+            dict_list.append(data)
 
-        date_key, location_key = None, None
+        return dict_list
 
-        for items in classification_list:
-            for index, item in enumerate(items):
-                if isinstance(item, float):
-                    item = str(item)
+    def group_by_date(self, dict_list):
+        """
+        한글 표 데이터를 날짜 별로 분류하여 리스트로 저장하여 반환합니다.
+        날짜 별 분류는 하나의 TableCell에 포함된 동일한 row값들 끼리 묶는 것으로 수행합니다.
+        """
+        group_list = []
 
-                if re.match(r'\d+월\d+일', item):
-                    date_key = item
-                elif item not in location_list:
-                    value_list.append(item)
-                elif item in location_list:
-                    location_key = item
-                    unique_key = str(uuid.uuid4())
-                    result_dict[location_key] = {} if location_key not in result_dict else result_dict[location_key]
+        for items in dict_list:
+            rows = list(set([int(item['row']) for item in items]))
+            for row in rows:
+                print(row)
+                temp = [item for item in items if int(item['row']) == row]
+                group_list.append(temp)
+        
+        return group_list
+    
+    def update_merge_data(self, group_list):
+        """
+        한글 표에 병합 처리된 셀에 대한 데이터 처리를 완료한 뒤 리스트로 반환합니다.
+        SimpleParser에서는 병합 셀이 아닌 셀의 최초 값이 공통 값으로 결정되기 때문에 이를 통해 값을 추가합니다.
+        """
+        cached_head_data = []
 
-                    result_dict[location_key][unique_key] = {'일시': date_key}
-                    idx1, idx2 = index + 1, index + 2
-                    for j in range(len(self.title)):
-                        result_dict[location_key][unique_key][f'{self.title[j]} 최저치'] = float(items[idx1])
-                        result_dict[location_key][unique_key][f'{self.title[j]} 최고치'] = float(items[idx2])
-                        idx1 += 2
-                        idx2 += 2
-                    idx1, idx2 = 0, 0
+        for idx, items in enumerate(group_list):
+            if len(items) == 1:
+                cached_head_data = items
 
-        return result_dict
+            new_items = []
+            if any(data not in items for data in cached_head_data):
+                new_items.extend(cached_head_data)
 
+            group_list[idx] = new_items + items
 
+        return [items for items in group_list if len(items) != 1]
+
+    
+    def serialize_to_dict(self, group_list, columns):
+        """
+        컬럼 리스트와 파싱이 끝난 그룹 리스트를 이용해서 데이터를 분류한 뒤 리스트로 반환합니다.
+        컬럼 리스트에 대응하는 값들을 그룹 리스트에서 찾아서 추가해주는 작업을 수행합니다.
+        """
+        serialize_list = []
+        cached_columns = []
+        
+        for item in columns:
+            if int(item['colspan']) > 1:
+                for t in ['최저치', '최고치']:
+                    data = {
+                        'row': item['row'],
+                        'col': item['col'],
+                        'colspan': item['colspan'],
+                        'rowspan': item['rowspan'],
+                        'text': f'{item['text']} {t}'
+                    }
+                    cached_columns.append(data)
+            else:
+                cached_columns.append(item)
+
+        for items in group_list:
+            data = {column['text']: item['text'] for column, item in zip(cached_columns, items) if column != '발파횟수'}
+            serialize_list.append(data)
+
+        return serialize_list
