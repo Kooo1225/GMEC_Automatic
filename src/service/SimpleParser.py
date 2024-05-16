@@ -1,17 +1,5 @@
-import re
-import uuid
-
 import numpy as np
-
 from src.service.ParseService import ParseService
-
-
-class SimpleParser():
-    import re, uuid
-import numpy as np
-
-from src.service.ParseService import ParseService
-
 
 class SimpleParser:
     def delete_non_target_data(self, table_data):
@@ -28,6 +16,8 @@ class SimpleParser:
                 for entry in sublist
             )
         ]
+
+        target_data = [[item for item in items if item['text'] != ''] for items in target_data]
 
         return target_data
 
@@ -85,7 +75,6 @@ class SimpleParser:
         for items in dict_list:
             rows = list(set([int(item['row']) for item in items]))
             for row in rows:
-                print(row)
                 temp = [item for item in items if int(item['row']) == row]
                 group_list.append(temp)
         

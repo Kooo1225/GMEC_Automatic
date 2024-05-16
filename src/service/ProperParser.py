@@ -1,8 +1,4 @@
-import re, uuid
-import numpy as np
-
 from src.service.ParseService import ParseService
-
 
 class ProperParser:
     def delete_non_target_data(self, table_data):
