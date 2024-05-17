@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
 from src.vo.FolderVO import FolderVO
+from src.dto.FolderDTO import *
 
 
 class FolderMapper:
-    def insert(self, vo: FolderVO, db: Session):
-        new_record = vo
+    def insert(self, dto: InsertFolderDTO, db: Session):
+        new_record = FolderVO(**dto.model_dump())
+        print(new_record)
         db.add(new_record)
         db.commit()
 
