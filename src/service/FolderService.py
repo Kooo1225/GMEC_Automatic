@@ -21,26 +21,26 @@ class FolderService:
         except Exception:
             raise ReadException()
 
-    def read(self, folder_id):
+    def read_id(self, folder_id, db: Session):
         try:
-            return self.mapper.read_id(folder_id)
+            return self.mapper.read_id(folder_id, db)
         except Exception:
             raise ReadException()
 
-    def read_location(self, location_id):
+    def read_location(self, location_id, db: Session):
         try:
-            return self.mapper.read_location(location_id)
+            return self.mapper.read_location(location_id, db)
         except Exception:
             raise ReadException()
 
-    def update(self, vo: FolderVO):
+    def update(self, dto: FolderDTOinDB, db: Session):
         try:
-            self.mapper.update(vo)
+            self.mapper.update(dto, db)
         except Exception:
             raise UpdateException()
 
-    def delete(self, folder_id):
+    def delete(self, folder_id: int, db: Session):
         try:
-            self.mapper.delete(folder_id)
+            self.mapper.delete(folder_id, db)
         except Exception:
             raise DeleteException()

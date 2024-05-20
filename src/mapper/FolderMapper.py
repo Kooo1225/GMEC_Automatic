@@ -6,7 +6,6 @@ from src.dto.FolderDTO import *
 class FolderMapper:
     def insert(self, dto: InsertFolderDTO, db: Session):
         new_record = FolderVO(**dto.model_dump())
-        print(new_record)
         db.add(new_record)
         db.commit()
 
@@ -19,7 +18,8 @@ class FolderMapper:
     def read_location(self, location_id: int, db: Session):
         return db.query(FolderVO).filter(FolderVO.location_id == location_id).all()
 
-    def update(self, vo: FolderVO, db: Session):
+    def update(self, dto: FolderDTOinDB, db: Session):
+        vo = FolderVO(**dto.model_dump())
         record = db.query(FolderVO).filter(FolderVO.folder_id == vo.folder_id).first()
         record.folder_name = vo.folder_name
         record.location_id = vo.location_id

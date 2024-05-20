@@ -1,7 +1,9 @@
+from sqlalchemy.orm import Session
+
 from src.exception.CustomException import *
 from src.mapper.LocationMapper import LocationMapper
 from src.vo.LocationVO import LocationVO
-
+from src.dto.LocationDTO import *
 
 class LocationService:
     mapper = LocationMapper()
@@ -12,9 +14,9 @@ class LocationService:
         except Exception:
             raise CreateException()
 
-    def read_all(self):
+    def read_all(self, db: Session):
         try:
-            return self.mapper.read_all()
+            return self.mapper.read_all(db)
         except Exception:
             raise ReadException()
 
